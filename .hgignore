@@ -1,0 +1,10 @@
+# use glob syntax.
+syntax: glob
+.bzr*
+*~
+*.pro.user
+*.deb
+
+# switch to regexp syntax.
+syntax: regexp
+#^\.pc/

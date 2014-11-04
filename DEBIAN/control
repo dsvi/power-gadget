@@ -1,0 +1,10 @@
+Source: indicator-power-gadget
+Maintainer: DS <DS@none>
+Section: misc
+Priority: optional
+Package: indicator-power-gadget
+Version: 0.1
+Depends: libqt5widgets5, libappindicator1
+Description: shows Intel CPUs/GPUs current power consumption
+ indicator-power-gadget shows Intel CPUs/GPUs current power consumption
+ 

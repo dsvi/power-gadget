@@ -1,0 +1,9 @@
+#!/usr/bin/python3
+
+import shutil
+import subprocess
+
+for theme in ['dark','light'] :
+  icon_theme_root = "/usr/share/icons/ubuntu-mono-{0}/".format(theme)
+  subprocess.check_call("gtk-update-icon-cache "+ icon_theme_root, shell=True)
+subprocess.check_call("setcap cap_sys_rawio,cap_setuid+eip /usr/bin/indicator-power-gadget", shell=True)

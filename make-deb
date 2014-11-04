@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+
+import shutil
+import subprocess
+import argparse
+import sys
+import os
+
+version = '0.1'
+
+dest_dir = "deb-out"
+program_file = './indicator-power-gadget'
+
+class tc:
+  RED = '\033[1;31m'
+  HEADER = '\033[95m'
+  OKBLUE = '\033[94m'
+  OKGREEN = '\033[92m'
+  WARNING = '\033[93m'
+  FAIL = '\033[91m'
+  END = '\033[0m'
+
+def status(msg):
+  print(tc.HEADER, msg, tc.END)
+  sys.stdout.flush()
+
+
+def rm(path):
+  if os.path.exists(path) :
+    if os.path.isdir(path):
+      shutil.rmtree(path,ignore_errors=False)
+    else :
+      os.remove(path)
+def clean() :
+  rm(dest_dir)
+  rm('./intermediate')
+  rm('./libintel.a')
+  rm('./indicator-power-gadget')
+  for root, dirs, files in os.walk('./'):
+    for name in files:
+      if name.startswith("Makefile"):
+        full_name = os.path.join(root, name)
+        rm(full_name)
+
+
+#check
+if not os.path.exists('./DEBIAN') :
+  print('Can`t find ./DEBIAN subdir. Are you running from the wrong directory?')
+
+#clean
+status('Cleaning')
+clean()
+
+#buld
+status('Building')
+subprocess.check_call('qmake -r -spec linux-clang "CONFIG+=release" power-gadget.pro', shell=True)
+subprocess.check_call('make', shell=True)
+subprocess.call('strip --strip-all '+program_file, shell=True)
+os.chmod(program_file, mode=0o755)
+
+#copy
+status('Copying files for deb package')
+os.mkdir(dest_dir)
+for theme in ['dark','light'] :
+  icon_theme_root = dest_dir+"/usr/share/icons/ubuntu-mono-{0}/".format(theme)
+  icon_path = icon_theme_root + "apps/scalable/"
+  os.makedirs(icon_path, mode=0o755, exist_ok=True)
+  shutil.copy("./indicator-processor-{0}.svg".format(theme), str(icon_path)+"indicator-processor.svg")
+bin_dst = dest_dir+'/usr/bin/'
+os.makedirs(bin_dst, mode=0o755, exist_ok=True)
+shutil.copy(program_file, bin_dst)
+shutil.copytree('./DEBIAN', dest_dir+'/DEBIAN')
+with open(dest_dir+'/DEBIAN/control', mode='a') as fl:
+  fl.write("Version: {0}\n".format(version))
+  fl.write ("Architecture: {0}\n".format(subprocess.getoutput('dpkg --print-architecture')) )
+
+
+#build .deb package
+status('Creating .deb package')
+subprocess.check_call('fakeroot dpkg-deb --build '+dest_dir+' .', shell=True)
+
+status('All done')
+clean()
+exit(0)
+
+
+
+
