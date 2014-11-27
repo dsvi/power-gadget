@@ -4,9 +4,6 @@
 #include <QObject>
 
 
-using Clock = std::chrono::high_resolution_clock;
-using TimePoint = std::chrono::time_point<Clock>;
-
 class PowerMeter : public QObject
 {
 	Q_OBJECT
@@ -34,6 +31,8 @@ private:
 	std::vector<double> GPUsPrevEnergy_;
 	std::vector<double> processorsPower_;
 	std::vector<double> GPUsPower_;
+	using Clock = std::chrono::high_resolution_clock;
+	using TimePoint = std::chrono::time_point<Clock>;
 	TimePoint        prevTime_;
 	int timerID_;
 };
